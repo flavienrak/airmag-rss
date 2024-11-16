@@ -1,8 +1,14 @@
 import fs from 'fs';
+import path from 'path';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
 import { BASE_URL } from './constants.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const filePath = path.join(__dirname, 'articles.json');
 
 const getNextPageUrl = (currentUrl) => {
   const urlObj = new URL(currentUrl, BASE_URL);
@@ -14,7 +20,7 @@ const getNextPageUrl = (currentUrl) => {
 
 const loadArticles = () => {
   try {
-    const data = fs.readFileSync('./articles.json', 'utf8');
+    const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);
   } catch (error) {
     console.log('Aucun fichier existant, création d’un nouveau fichier.');
@@ -24,11 +30,7 @@ const loadArticles = () => {
 
 const saveArticles = (articles) => {
   try {
-    fs.writeFileSync(
-      './articles.json',
-      JSON.stringify(articles, null, 2),
-      'utf8'
-    );
+    fs.writeFileSync(filePath, JSON.stringify(articles, null, 2), 'utf8');
     console.log('Articles enregistrés avec succès.');
   } catch (error) {
     console.error("Erreur lors de l'enregistrement des articles :", error);
