@@ -1,4 +1,6 @@
 import express from 'express';
+import winston from 'winston';
+
 import { createRSSFeed } from './utils/xml.render.js';
 import { fetchArticles } from './utils/articles.js';
 import { createHTMLFeed } from './utils/html.render.js';
@@ -21,6 +23,12 @@ async function fetchRSSWithCache() {
   return cache;
 }
 
+export const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.simple(),
+  transports: [new winston.transports.Console()],
+});
+
 app.get('/', async (req, res) => {
   res.send('Welcome !');
 });
@@ -38,13 +46,13 @@ app.get('/rss/html', (req, res) => {
 });
 
 setInterval(async () => {
-  console.log('Vérification toutes les 15 minutes...');
+  logger.info('Vérification toutes les 15 minutes...');
   await fetchRSSWithCache();
 }, 15 * 60 * 1000);
 
 // Démarrer le serveur
 app.listen(PORT, () => {
-  console.log(`RSS Feed server is running at http://localhost:${PORT}/rss`);
+  logger.info(`RSS Feed server is running at http://localhost:${PORT}/rss`);
 });
 
 export default app;

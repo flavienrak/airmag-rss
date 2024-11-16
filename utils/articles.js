@@ -5,6 +5,7 @@ import * as cheerio from 'cheerio';
 
 import { BASE_URL } from './constants.js';
 import { fileURLToPath } from 'url';
+import { logger } from '../server.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +24,7 @@ const loadArticles = () => {
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);
   } catch (error) {
-    console.log('Aucun fichier existant, création d’un nouveau fichier.');
+    logger.info('Aucun fichier existant, création d’un nouveau fichier.');
     return [];
   }
 };
@@ -31,7 +32,7 @@ const loadArticles = () => {
 const saveArticles = (articles) => {
   try {
     fs.writeFileSync(filePath, JSON.stringify(articles, null, 2), 'utf8');
-    console.log('Articles enregistrés avec succès.');
+    logger.info('Articles enregistrés avec succès.');
   } catch (error) {
     console.error("Erreur lors de l'enregistrement des articles :", error);
   }
@@ -61,11 +62,11 @@ const fetchArticles = async () => {
   let existingArticles = loadArticles();
 
   while (currentPageUrl) {
-    console.log(`url: ${currentPageUrl}`);
+    logger.info(`url: ${currentPageUrl}`);
     try {
       const { data, status } = await axios.get(currentPageUrl);
       if (status !== 200) {
-        console.log(`Erreur avec le statut ${status} pour ${currentPageUrl}`);
+        logger.info(`Erreur avec le statut ${status} pour ${currentPageUrl}`);
         break;
       }
 
@@ -84,7 +85,7 @@ const fetchArticles = async () => {
             (article) => article.link === articleLink
           );
           if (isArticleAlreadyPresent) {
-            console.log(
+            logger.info(
               `Article déjà trouvé : ${articleLink}, arrêt du processus.`
             );
             return;
@@ -101,7 +102,7 @@ const fetchArticles = async () => {
       });
 
       if (!pageHasArticles) {
-        console.log('Aucun article trouvé sur cette page.');
+        logger.info('Aucun article trouvé sur cette page.');
         break;
       }
 
